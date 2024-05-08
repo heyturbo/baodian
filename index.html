@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>宝典灵魂仙葫</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .result {
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .count {
+      margin-bottom: 10px;
+    }
+    .backpack {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .backpack ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #4CAF50;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    .button:hover {
+      background-color: #45a049;
+    }
+    .checkbox {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>宝典灵魂仙葫</h1>
+  <div class="container">
+    <div class="count">您已经开启了 <span id="chestCount">0</span> 个仙葫</div>
+    <div class="result" id="result"></div>
+    <button class="button" onclick="openChest()">开启</button>
+    <button class="button" onclick="takeOut()">取出</button>
+    <button class="button" onclick="resetCount()">清零</button>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" id="autoOpen"> 自动开启下一次
+      </label>
+    </div>
+    <div class="backpack">
+      <h2>我的背包</h2>
+      <ul id="backpack"></ul>
+    </div>
+  </div>
+
+  <script>
+    const skillBooks = [
+      { name: "【妙法莲华】七级技能书", probability: 0.003 },
+      { name: "【妙法莲华】八级技能书", probability: 0.003 },
+      { name: "【烈焰风暴】一级技能书", probability: 0.0075 },
+      { name: "【梦魔咒】一级技能书", probability: 0.0075 },
+      { name: "【仙气护体】一级技能书", probability: 0.0075 },
+      { name: "【凝神聚气】一级技能书", probability: 0.0075 },
+      { name: "【龙破斩】一级技能书", probability: 0.0075 },
+      { name: "【同生共死】一级技能书", probability: 0.0075 },
+      { name: "【腐骨蚀心】一级技能书", probability: 0.0075 },
+      { name: "【穿心蚀骨】一级技能书", probability: 0.0075 },
+      { name: "【烈焰风暴】二级技能书", probability: 0.00625 },
+      { name: "【梦魔咒】二级技能书", probability: 0.00625 },
+      { name: "【仙气护体】二级技能书", probability: 0.00625 },
+      { name: "【凝神聚气】二级技能书", probability: 0.00625 },
+      { name: "【龙破斩】二级技能书", probability: 0.00625 },
+      { name: "【同生共死】二级技能书", probability: 0.00625 },
+      { name: "【腐骨蚀心】二级技能书", probability: 0.00625 },
+      { name: "【穿心蚀骨】二级技能书", probability: 0.00625 },
+      { name: "【烈焰风暴】三级技能书", probability: 0.003 },
+      { name: "【梦魔咒】三级技能书", probability: 0.003 },
+      { name: "【仙气护体】三级技能书", probability: 0.003 },
+      { name: "【凝神聚气】三级技能书", probability: 0.003 },
+      { name: "【龙破斩】三级技能书", probability: 0.003 },
+      { name: "【同生共死】三级技能书", probability: 0.003 },
+      { name: "【腐骨蚀心】三级技能书", probability: 0.003 },
+      { name: "【穿心蚀骨】三级技能书", probability: 0.003 },
+      { name: "【烈焰风暴】四级技能书", probability: 0.00375 },
+      { name: "【梦魔咒】四级技能书", probability: 0.00375 },
+      { name: "【仙气护体】四级技能书", probability: 0.00375 },
+      { name: "【凝神聚气】四级技能书", probability: 0.00375 },
+      { name: "【龙破斩】四级技能书", probability: 0.00375 },
+      { name: "【同生共死】四级技能书", probability: 0.00375 },
+      { name: "【腐骨蚀心】四级技能书", probability: 0.00375 },
+      { name: "【穿心蚀骨】四级技能书", probability: 0.00375 },
+      { name: "【烈焰风暴】五级技能书", probability: 0.0025 },
+      { name: "【梦魔咒】五级技能书", probability: 0.0025 },
+      { name: "【仙气护体】五级技能书", probability: 0.0025 },
+      { name: "【凝神聚气】五级技能书", probability: 0.0025 },
+      { name: "【龙破斩】五级技能书", probability: 0.0025 },
+      { name: "【同生共死】五级技能书", probability: 0.0025 },
+      { name: "【腐骨蚀心】五级技能书", probability: 0.0025 },
+      { name: "【穿心蚀骨】五级技能书", probability: 0.0025 },
+      { name: "【微缩技能经验卷轴】", probability: 0.014 },
+      { name: "【中型技能经验神符】", probability: 0.005 },
+      { name: "【四相诀】七级技能书", probability: 0.005 },
+      { name: "【唤灭破】七级技能书", probability: 0.005 },
+      { name: "【恸地神咒】七级技能书", probability: 0.005 },
+      { name: "【摄魂咒】七级技能书", probability: 0.005 },
+      { name: "【魅惑术】七级技能书", probability: 0.005 },
+      { name: "【暗影魔咒】七级技能书", probability: 0.005 },
+      { name: "【沉水润心】七级技能书", probability: 0.005 },
+      { name: "【慈悲咒】七级技能书", probability: 0.005 },
+      { name: "【仙音化雨】七级技能书", probability: 0.01 },
+      { name: "【天地极乐】七级技能书", probability: 0.01 },
+      { name: "【昊天罡气】七级技能书", probability: 0.01 },
+      { name: "【圣灵附体】七级技能书", probability: 0.01 },
+      { name: "【伏魔刀法】七级技能书", probability: 0.01 },
+      { name: "【六脉神剑】七级技能书", probability: 0.01 },
+      { name: "【破釜沉舟】七级技能书", probability: 0.01 },
+      { name: "【冷嘲热讽】七级技能书", probability: 0.01 },
+      { name: "【君临天下】七级技能书", probability: 0.01 },
+      { name: "【一朝归元】七级技能书", probability: 0.01 },
+      { name: "【千蛛万毒手】七级技能书", probability: 0.01 },
+      { name: "【暗影迷踪拳】七级技能书", probability: 0.01 },
+      { name: "【化功绵掌】七级技能书", probability: 0.01 },
+      { name: "【八荒六合】七级技能书", probability: 0.01 },
+      { name: "【飞花溅玉】七级技能书", probability: 0.01 },
+      { name: "【疾影袭心】七级技能书", probability: 0.01 },
+      { name: "【四相诀】八级技能书", probability: 0.005 },
+      { name: "【唤灭破】八级技能书", probability: 0.005 },
+      { name: "【恸地神咒】八级技能书", probability: 0.006 },
+      { name: "【摄魂咒】八级技能书", probability: 0.006 },
+      { name: "【魅惑术】八级技能书", probability: 0.006 },
+      { name: "【暗影魔咒】八级技能书", probability: 0.006 },
+      { name: "【沉水润心】八级技能书", probability: 0.006 },
+      { name: "【慈悲咒】八级技能书", probability: 0.006 },
+      { name: "【仙音化雨】八级技能书", probability: 0.007 },
+      { name: "【天地极乐】八级技能书", probability: 0.007 },
+      { name: "【昊天罡气】八级技能书", probability: 0.007 },
+      { name: "【圣灵附体】八级技能书", probability: 0.007 },
+      { name: "【伏魔刀法】八级技能书", probability: 0.007 },
+      { name: "【六脉神剑】八级技能书", probability: 0.007 },
+      { name: "【破釜沉舟】八级技能书", probability: 0.007 },
+      { name: "【冷嘲热讽】八级技能书", probability: 0.007 },
+      { name: "【君临天下】八级技能书", probability: 0.007 },
+      { name: "【一朝归元】八级技能书", probability: 0.007 },
+      { name: "【千蛛万毒手】八级技能书", probability: 0.008 },
+      { name: "【暗影迷踪拳】八级技能书", probability: 0.008 },
+      { name: "【化功绵掌】八级技能书", probability: 0.008 },
+      { name: "【八荒六合】八级技能书", probability: 0.008 },
+      { name: "【飞花溅玉】八级技能书", probability: 0.008 },
+      { name: "【疾影袭心】八级技能书", probability: 0.008 },
+      { name: "【四相诀】九级技能书", probability: 0.006 },
+      { name: "【唤灭破】九级技能书", probability: 0.006 },
+      { name: "【恸地神咒】九级技能书", probability: 0.006 },
+      { name: "【摄魂咒】九级技能书", probability: 0.006 },
+      { name: "【魅惑术】九级技能书", probability: 0.006 },
+      { name: "【暗影魔咒】九级技能书", probability: 0.006 },
+      { name: "【沉水润心】九级技能书", probability: 0.006 },
+      { name: "【慈悲咒】九级技能书", probability: 0.006 },
+      { name: "【仙音化雨】九级技能书", probability: 0.006 },
+      { name: "【天地极乐】九级技能书", probability: 0.006 },
+      { name: "【昊天罡气】九级技能书", probability: 0.006 },
+      { name: "【圣灵附体】九级技能书", probability: 0.006 },
+      { name: "【伏魔刀法】九级技能书", probability: 0.006 },
+      { name: "【六脉神剑】九级技能书", probability: 0.006 },
+      { name: "【破釜沉舟】九级技能书", probability: 0.006 },
+      { name: "【冷嘲热讽】九级技能书", probability: 0.006 },
+      { name: "【君临天下】九级技能书", probability: 0.006 },
+      { name: "【一朝归元】九级技能书", probability: 0.006 },
+      { name: "【千蛛万毒手】九级技能书", probability: 0.006 },
+      { name: "【暗影迷踪拳】九级技能书", probability: 0.006 },
+      { name: "【化功绵掌】九级技能书", probability: 0.006 },
+      { name: "【八荒六合】九级技能书", probability: 0.006 },
+      { name: "【飞花溅玉】九级技能书", probability: 0.006 },
+      { name: "【疾影袭心】九级技能书", probability: 0.006 },
+      { name: "【四相诀】十级技能书", probability: 0.004 },
+      { name: "【唤灭破】十级技能书", probability: 0.004 },
+      { name: "【恸地神咒】十级技能书", probability: 0.004 },
+      { name: "【摄魂咒】十级技能书", probability: 0.004 },
+      { name: "【魅惑术】十级技能书", probability: 0.004 },
+      { name: "【暗影魔咒】十级技能书", probability: 0.004 },
+      { name: "【沉水润心】十级技能书", probability: 0.004 },
+      { name: "【慈悲咒】十级技能书", probability: 0.004 },
+      { name: "【天地极乐】十级技能书", probability: 0.004 },
+      { name: "【仙音化雨】十级技能书", probability: 0.004 },
+      { name: "【昊天罡气】十级技能书", probability: 0.004 },
+      { name: "【圣灵附体】十级技能书", probability: 0.004 },
+      { name: "【伏魔刀法】十级技能书", probability: 0.004 },
+      { name: "【六脉神剑】十级技能书", probability: 0.004 },
+      { name: "【破釜沉舟】十级技能书", probability: 0.004 },
+      { name: "【冷嘲热讽】十级技能书", probability: 0.004 },
+      { name: "【君临天下】十级技能书", probability: 0.004 },
+      { name: "【一朝归元】十级技能书", probability: 0.004 },
+      { name: "【千蛛万毒手】十级技能书", probability: 0.004 },
+      { name: "【暗影迷踪拳】十级技能书", probability: 0.004 },
+      { name: "【化功绵掌】十级技能书", probability: 0.004 },
+      { name: "【八荒六合】十级技能书", probability: 0.003 },
+      { name: "【飞花溅玉】十级技能书", probability: 0.003 },
+      { name: "【疾影袭心】十级技能书", probability: 0.003 },
+      { name: "【妙法莲华】一级技能书", probability: 0.003 },
+      { name: "【妙法莲华】二级技能书", probability: 0.003 },
+      { name: "【妙法莲华】三级技能书", probability: 0.002 },
+      { name: "【妙法莲华】四级技能书", probability: 0.0005 },
+      { name: "【妙法莲华】五级技能书", probability: 0.001 },
+      { name: "【妙法莲华】六级技能书", probability: 0.0005 },
+      { name: "【仙气护体】六级技能书", probability: 0.0075 },
+      { name: "【仙气护体】七级技能书", probability: 0.0063 },
+      { name: "【仙气护体】八级技能书", probability: 0.005 },
+      { name: "【仙气护体】九级技能书", probability: 0.0038 },
+      { name: "【仙气护体】十级技能书", probability: 0.0025 },
+      { name: "【凝神聚气】六级技能书", probability: 0.0075 },
+      { name: "【凝神聚气】七级技能书", probability: 0.0063 },
+      { name: "【凝神聚气】八级技能书", probability: 0.005 },
+      { name: "【凝神聚气】九级技能书", probability: 0.0038 },
+      { name: "【凝神聚气】十级技能书", probability: 0.0025 },
+      { name: "【龙破斩】六级技能书", probability: 0.0075 },
+      { name: "【龙破斩】七级技能书", probability: 0.0063 },
+      { name: "【龙破斩】八级技能书", probability: 0.005 },
+      { name: "【龙破斩】九级技能书", probability: 0.0038 },
+      { name: "【龙破斩】十级技能书", probability: 0.0025 },
+      { name: "【同生共死】六级技能书", probability: 0.0075 },
+      { name: "【同生共死】七级技能书", probability: 0.0063 },
+      { name: "【同生共死】八级技能书", probability: 0.005 },
+      { name: "【同生共死】九级技能书", probability: 0.0038 },
+      { name: "【同生共死】十级技能书", probability: 0.0025 },
+      { name: "【腐骨蚀心】六级技能书", probability: 0.0075 },
+      { name: "【腐骨蚀心】七级技能书", probability: 0.0063 },
+      { name: "【腐骨蚀心】八级技能书", probability: 0.005 },
+      { name: "【腐骨蚀心】九级技能书", probability: 0.0038 },
+      { name: "【腐骨蚀心】十级技能书", probability: 0.0025 },
+      { name: "【穿心蚀骨】六级技能书", probability: 0.0075 },
+      { name: "【穿心蚀骨】七级技能书", probability: 0.0063 },
+      { name: "【穿心蚀骨】八级技能书", probability: 0.005 },
+      { name: "【穿心蚀骨】九级技能书", probability: 0.0038 },
+      { name: "【穿心蚀骨】十级技能书", probability: 0.0025 },
+      { name: "【烈焰风暴】六级技能书", probability: 0.003 },
+      { name: "【烈焰风暴】七级技能书", probability: 0.003 },
+      { name: "【烈焰风暴】八级技能书", probability: 0.003 },
+      { name: "【烈焰风暴】九级技能书", probability: 0.003 },
+      { name: "【烈焰风暴】十级技能书", probability: 0.003 },
+      { name: "【梦魔咒】六级技能书", probability: 0.003 },
+      { name: "【梦魔咒】七级技能书", probability: 0.003 },
+      { name: "【梦魔咒】八级技能书", probability: 0.003 },
+      { name: "【梦魔咒】九级技能书", probability: 0.0030 },
+      { name: "【梦魔咒】十级技能书", probability: 0.0030 }
+    ];
+
+    let currentSkillBook = null;
+    let chestCount = 0;
+
+    function getRandomSkillBook() {
+      const randomNumber = Math.random();
+      let cumulativeProbability = 0;
+
+      for (const skillBook of skillBooks) {
+        cumulativeProbability += skillBook.probability;
+        if (randomNumber <= cumulativeProbability) {
+          return skillBook.name;
+        }
+      }
+    }
+
+    function openChest() {
+      currentSkillBook = getRandomSkillBook();
+      document.getElementById("result").textContent = "恭喜你获得了：" + currentSkillBook;
+      chestCount++;
+      document.getElementById("chestCount").textContent = chestCount;
+    }
+
+    function takeOut() {
+      if (currentSkillBook) {
+        const backpackList = document.getElementById("backpack");
+        const listItem = document.createElement("li");
+        listItem.textContent = currentSkillBook;
+        backpackList.appendChild(listItem);
+        currentSkillBook = null;
+        document.getElementById("result").textContent = "";
+
+        if (document.getElementById("autoOpen").checked) {
+          openChest();
+        }
+      }
+    }
+
+    function resetCount() {
+      chestCount = 0;
+      document.getElementById("chestCount").textContent = chestCount;
+      document.getElementById("backpack").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
