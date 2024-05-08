@@ -31,9 +31,21 @@
     .count {
       margin-bottom: 10px;
     }
+    .category {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .category p {
+      margin: 5px 0;
+      display: inline-block;
+      padding: 0 10px;
+    }
+    .category .highlight {
+      color: #ff0000;
+    }
     .backpack {
       margin-top: 20px;
-      text-align: left;
+      text-align: center;
     }
     .backpack ul {
       list-style-type: none;
@@ -75,12 +87,24 @@
         <input type="checkbox" id="autoOpen"> 自动开启下一次
       </label>
     </div>
+    <div class="category">
+      <h2>归属心法</h2>
+      <p>英勇：<span id="category-0">0</span></p>
+      <p>坚韧：<span id="category-1">0</span></p>
+      <p>自信：<span id="category-2">0</span></p>
+      <p>洞察：<span id="category-3">0</span></p>
+      <br>
+      <p>热诚：<span id="category-4">0</span></p>
+      <p>迷惑：<span id="category-5">0</span></p>
+      <p>慈悲：<span id="category-6">0</span></p>
+      <p>怜悯：<span id="category-7">0</span></p>
+    </div>
     <div class="backpack">
-      <h2>我的背包</h2>
+      <h2>你的背包</h2>
       <ul id="backpack"></ul>
     </div>
     <div class="experience">
-      技能经验：<span id="experiencePoints">0</span>
+      技能经验（取出后会自动吃）：<span id="experiencePoints">0</span>
     </div>
   </div>
 
@@ -278,6 +302,19 @@
     let chestCount = 0;
     let backpackItems = {};
     let experiencePoints = 0;
+    let categoryCount = [0, 0, 0, 0, 0, 0, 0, 0];
+    let lastCategory = -1;
+
+    const categoryMapping = {
+      "伏魔刀法": 0, "破釜沉舟": 0, "六脉神剑": 0, "龙破斩": 0,
+      "君临天下": 1, "冷嘲热讽": 1, "一朝归元": 1, "同生共死": 1,
+      "千蛛万毒手": 2, "暗影迷踪拳": 2, "化功绵掌": 2, "腐骨蚀心": 2,
+      "疾影袭心": 3, "八荒六合": 3, "飞花溅玉": 3, "穿心蚀骨": 3,
+      "四相诀": 4, "唤灭破": 4, "恸地神咒": 4, "烈焰风暴": 4,
+      "摄魂咒": 5, "魅惑术": 5, "暗影魔咒": 5, "梦魔咒": 5,
+      "慈悲咒": 6, "仙音化雨": 6, "沉水润心": 6, "仙气护体": 6, "妙法莲华": 6,
+      "天地极乐": 7, "圣灵附体": 7, "昊天罡气": 7, "凝神聚气": 7
+    };
 
     function getRandomSkillBook() {
       const randomNumber = Math.random();
@@ -296,6 +333,18 @@
       document.getElementById("result").textContent = currentSkillBook;
       chestCount++;
       document.getElementById("chestCount").textContent = chestCount;
+
+      const category = categoryMapping[currentSkillBook.split("】")[0].split("【")[1]];
+      if (category !== undefined) {
+        categoryCount[category]++;
+        document.getElementById("category-" + category).textContent = categoryCount[category];
+
+        if (lastCategory !== -1) {
+          document.getElementById("category-" + lastCategory).parentElement.classList.remove("highlight");
+        }
+        document.getElementById("category-" + category).parentElement.classList.add("highlight");
+        lastCategory = category;
+      }
     }
 
     function takeOut() {
@@ -326,9 +375,15 @@
       chestCount = 0;
       backpackItems = {};
       experiencePoints = 0;
+      categoryCount = [0, 0, 0, 0, 0, 0, 0, 0];
+      lastCategory = -1;
       document.getElementById("chestCount").textContent = chestCount;
       document.getElementById("backpack").innerHTML = "";
       document.getElementById("experiencePoints").textContent = experiencePoints;
+      for (let i = 0; i < 8; i++) {
+        document.getElementById("category-" + i).textContent = "0";
+        document.getElementById("category-" + i).parentElement.classList.remove("highlight");
+      }
     }
 
     function updateBackpack() {
