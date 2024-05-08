@@ -25,6 +25,8 @@
     .result {
       margin-bottom: 20px;
       font-weight: bold;
+      font-size: 24px;
+      color: #ff0000;
     }
     .count {
       margin-bottom: 10px;
@@ -54,10 +56,14 @@
     .checkbox {
       margin-top: 10px;
     }
+    .experience {
+      margin-top: 20px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>宝典灵魂仙葫</h1>
+  <h1>宝典灵魂仙葫开启游戏</h1>
   <div class="container">
     <div class="count">您已经开启了 <span id="chestCount">0</span> 个仙葫</div>
     <div class="result" id="result"></div>
@@ -72,6 +78,9 @@
     <div class="backpack">
       <h2>我的背包</h2>
       <ul id="backpack"></ul>
+    </div>
+    <div class="experience">
+      技能经验：<span id="experiencePoints">0</span>
     </div>
   </div>
 
@@ -267,6 +276,8 @@
 
     let currentSkillBook = null;
     let chestCount = 0;
+    let backpackItems = {};
+    let experiencePoints = 0;
 
     function getRandomSkillBook() {
       const randomNumber = Math.random();
@@ -282,17 +293,26 @@
 
     function openChest() {
       currentSkillBook = getRandomSkillBook();
-      document.getElementById("result").textContent = "恭喜你获得了：" + currentSkillBook;
+      document.getElementById("result").textContent = "你获得了：" + currentSkillBook;
       chestCount++;
       document.getElementById("chestCount").textContent = chestCount;
     }
 
     function takeOut() {
       if (currentSkillBook) {
-        const backpackList = document.getElementById("backpack");
-        const listItem = document.createElement("li");
-        listItem.textContent = currentSkillBook;
-        backpackList.appendChild(listItem);
+        if (currentSkillBook === "【微缩技能经验卷轴】") {
+          experiencePoints += 500;
+        } else if (currentSkillBook === "【中型技能经验神符】") {
+          experiencePoints += 1000;
+        } else {
+          if (backpackItems[currentSkillBook]) {
+            backpackItems[currentSkillBook]++;
+          } else {
+            backpackItems[currentSkillBook] = 1;
+          }
+        }
+        document.getElementById("experiencePoints").textContent = experiencePoints;
+        updateBackpack();
         currentSkillBook = null;
         document.getElementById("result").textContent = "";
 
@@ -304,8 +324,32 @@
 
     function resetCount() {
       chestCount = 0;
+      backpackItems = {};
+      experiencePoints = 0;
       document.getElementById("chestCount").textContent = chestCount;
       document.getElementById("backpack").innerHTML = "";
+      document.getElementById("experiencePoints").textContent = experiencePoints;
+    }
+
+    function updateBackpack() {
+      const backpackList = document.getElementById("backpack");
+      backpackList.innerHTML = "";
+
+      const sortedItems = Object.keys(backpackItems).sort((a, b) => {
+        const [nameA, levelA] = a.split("】")[0].split("【")[1].split("级");
+        const [nameB, levelB] = b.split("】")[0].split("【")[1].split("级");
+        if (nameA !== nameB) {
+          return nameA.localeCompare(nameB);
+        } else {
+          return Number(levelA) - Number(levelB);
+        }
+      });
+
+      for (const item of sortedItems) {
+        const listItem = document.createElement("li");
+        listItem.textContent = item + " * " + backpackItems[item];
+        backpackList.appendChild(listItem);
+      }
     }
   </script>
 </body>
